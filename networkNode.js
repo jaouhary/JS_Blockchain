@@ -5,8 +5,9 @@ const Blockchain = require('./blockchain.js')
 const uuid = require('uuid/v1')
 const rp = require('request-promise')
 
-const port = process.argv[2]; 
+// Take in the arguments for processing
 
+const port = process.argv[2]; 
 const currentNodeUrl = process.argv[3];
 
 // Determine the node's address
@@ -93,6 +94,8 @@ app.get('/mine', function (req, res) {
     
 })
 
+// Endpoint to receive mined block and push it to the blockchain
+
 app.post('/receive-block', function(req, res) {
     const newBlock = req.body.newBlock;
     // Check if the block is legitimate
@@ -113,6 +116,8 @@ app.post('/receive-block', function(req, res) {
         });
     }
 })
+
+// Endpoint to register and broadcast a new node in the network
 
 app.post('/register-and-broadcast-node', function(req, res) {
     const newNodeUrl = req.body.newNodeUrl;
@@ -151,6 +156,8 @@ app.post('/register-and-broadcast-node', function(req, res) {
     
 })
 
+// Endpoint to register a new node in the view of the actual node
+
 app.post('/register-node', function(req, res) {
     const newNodeUrl = req.body.newNodeUrl;
     const nodeNotAlreadyPresent = bitcoin.networkNodes.indexOf(newNodeUrl) == -1;
@@ -177,6 +184,8 @@ app.post('/register-bulk-nodes', function(req, res) {
     })
 })
 
+// Endpoint to broadcast and register an operation in the network
+
 app.post('/operation/broadcast', function(req, res) {
     const message = req.body.message;
     const sender = req.body.sender;
@@ -202,6 +211,8 @@ app.post('/operation/broadcast', function(req, res) {
         res.json({ note: 'New operation registered successfully in the network'})
     });
 })
+
+// Endpoint to reach consensus in the network
 
 app.get('/consensus', function(req, res) {
     const requestPromises = []; 
@@ -247,6 +258,8 @@ app.get('/consensus', function(req, res) {
     })
 })
 
+// Endpoint to retrieve a block according to his hash
+
 app.get('/block/:blockHash', function(req, res) {
     const blockHash = req.params.blockHash;
     const correctBlock = bitcoin.getBlock(blockHash);
@@ -254,6 +267,8 @@ app.get('/block/:blockHash', function(req, res) {
         block: correctBlock
     })       
 }) 
+
+// Endpoint to retrieve an operating according to the id
 
 app.get('/operation/:operationId', function(req, res) {
     const operationId = req.params.operationId;
@@ -264,6 +279,8 @@ app.get('/operation/:operationId', function(req, res) {
     })
 })
 
+// Endpoint to retrieve a block according to the owner
+
 app.get('/address/:address', function(req, res) {
     const address = req.params.address;
     const addressData = bitcoin.getAddressData(address);
@@ -272,6 +289,8 @@ app.get('/address/:address', function(req, res) {
         operations: addressData.operations
     })
 })
+
+// Endpoint to show the block-explorer
 
 app.get('/block-explorer', function(req, res) {
     res.sendFile('./block-explorer/index.html', { root : __dirname });

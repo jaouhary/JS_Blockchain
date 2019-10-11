@@ -1,7 +1,9 @@
 // SHA-256 library
+// Used for hashing blocks
 var forge = require('node-forge');
 
 // Unique identifier library
+// Used to create unique identifiers for operations 
 const uuid = require('uuid/v1');
 
 class Blockchain {
@@ -57,9 +59,10 @@ class Blockchain {
         return newOperation;
     }
     pushNewOperation(newOperation) {
-        // Push the new operation with the other operations
+        // Push the new operation with the other pending operations
         this.pendingOperations.push(newOperation);
 
+        // Return the index of the operation in the pending operations array
         return this.getLastBlock()['index'] + 1;
     }
 
@@ -74,12 +77,13 @@ class Blockchain {
 
         return md.digest().toHex();
 
-        // return the hash
+        // return the hash in hexadecimals
     }
 
     proofOfWork(previousBlockHash, currentBlockData) {
         let nonce = 0;
         let hash = this.hashBlock(previousBlockHash, nonce, currentBlockData);
+        // The verification in this case is to have four zeros at the beggining of the hash
         while(hash.substring(0,4)!=="0000") {
             nonce++;
             hash = this.hashBlock(previousBlockHash, nonce, currentBlockData);
@@ -120,6 +124,7 @@ class Blockchain {
         return chainValid;
     }
 
+    // Search for a certain block in the blockchain using the hash
     getBlock(blockHash) {
         let resBlock = null;
         this.chain.forEach(block => {
@@ -130,6 +135,7 @@ class Blockchain {
         return resBlock;
     }
 
+    // Search for a certain operation in the blockchain using the operation's id
     getOperation(operationId) {
         let resOperation = null;
         let resBlock = null;
@@ -149,15 +155,18 @@ class Blockchain {
         }
     }
 
+    // Return the balance of a certain user using the address
     getAddressData(address) {
         const operations = [];
         let balance = 0;
 
         this.chain.forEach(block => {
             block.operations.forEach(operation => {
+                // The user is the sender of the transaction
                 if (address === operation.sender) {
                    operations.push(operation);
                    balance -= operation.message;
+                // The user is the recipient of the transaction
                 } else if (address === operation.recipient) {
                    operations.push(operation);
                    balance += operation.message;
